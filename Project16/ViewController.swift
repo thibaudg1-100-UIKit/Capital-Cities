@@ -54,11 +54,20 @@ class ViewController: UIViewController, MKMapViewDelegate {
             let title = capital.title
             let message = capital.info
             
-            let ac = UIAlertController(title: title, message: message, preferredStyle: .alert)
+
             
-            ac.addAction(UIAlertAction(title: "OK", style: .default))
-            
-            present(ac, animated: true)
+            if let vc = storyboard?.instantiateViewController(withIdentifier: "WebView") as? WebViewController {
+                vc.city = title
+                
+                navigationController?.pushViewController(vc, animated: true)
+                
+            } else {
+                let ac = UIAlertController(title: title, message: message, preferredStyle: .alert)
+    
+                ac.addAction(UIAlertAction(title: "OK", style: .default))
+    
+                present(ac, animated: true)
+            }
         }
     }
     
