@@ -7,6 +7,7 @@
 
 import UIKit
 import MapKit
+import Contacts
 
 class ViewController: UIViewController, MKMapViewDelegate {
     @IBOutlet var mapView: MKMapView!
@@ -27,6 +28,14 @@ class ViewController: UIViewController, MKMapViewDelegate {
         mapView.addAnnotation(london)
         // or several at once:
         mapView.addAnnotations([oslo, paris, rome, washington, riga])
+        
+        
+        let coords = CLLocationCoordinate2DMake(51.5083, -0.1384)
+        let address = [CNPostalAddressStreetKey: "181 Piccadilly, St. James's", CNPostalAddressCityKey: "London", CNPostalAddressPostalCodeKey: "W1A 1ER", CNPostalAddressISOCountryCodeKey: "GB"]
+
+        let place = MKPlacemark(coordinate: coords, addressDictionary: address)
+
+        mapView.addAnnotation(place)
     }
 
     func mapView(_ mapView: MKMapView, viewFor annotation: MKAnnotation) -> MKAnnotationView? {
