@@ -12,11 +12,15 @@ import Contacts
 class ViewController: UIViewController, MKMapViewDelegate {
     @IBOutlet var mapView: MKMapView!
     
+    var searchResults = [MKMapItem]()
+    var resultAnnotations = [MKPointAnnotation]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
         title = "Capital Cities"
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(changeMapType))
+        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .search, target: self, action: #selector(searchPlace))
         
         let london = Capital(title: "London", coordinate: CLLocationCoordinate2D(latitude: 51.507222, longitude: -0.1275), info: "Home to the 2012 Summer Olympics.")
         let oslo = Capital(title: "Oslo", coordinate: CLLocationCoordinate2D(latitude: 59.95, longitude: 10.75), info: "Founded over a thousand years ago.")
@@ -98,6 +102,51 @@ class ViewController: UIViewController, MKMapViewDelegate {
         ac.popoverPresentationController?.barButtonItem = navigationItem.rightBarButtonItem
         
         present(ac, animated: true)
+    }
+    
+    @objc func searchPlace() {
+        let ac = UIAlertController(title: "Look up a place", message: nil, preferredStyle: .alert)
+        ac.addTextField()
+        
+        let search = UIAlertAction(title: "Search", style: .default) { [weak self, weak ac] _ in
+            guard let query = ac?.textFields?[0].text else { return }
+            
+            let searchRequest = MKLocalSearch.Request()
+            searchRequest.naturalLanguageQuery = query
+            if let region = self?.mapView.region { searchRequest.region = region}
+            
+            let search = MKLocalSearch(request: searchRequest)
+            
+            search.start { response, error in
+                guard let response = response else {
+                        print("Error: \(error?.localizedDescription ?? "Unknown error").")
+                        return
+                }
+                
+                self?.searchResults = response.mapItems
+                
+                self?.showResults()
+            }
+        }
+        
+        ac.addAction(search)
+        
+        present(ac, animated: true)
+    }
+    
+    func showResults() {
+        mapView.removeAnnotations(resultAnnotations)
+        
+        for result in searchResults {
+            print(result.name ?? "No name for this item")
+            
+            let newAnnotation = MKPointAnnotation()
+            newAnnotation.coordinate = result.placemark.coordinate
+            newAnnotation.title = result.name ?? "Unknown"
+            
+            resultAnnotations.append(newAnnotation)
+            mapView.addAnnotation(newAnnotation)
+        }
     }
 }
 
